@@ -59,6 +59,3 @@ async def roll(ctx, dice: str):
     await ctx.send(response)
 
 bot.run(TOKEN)
-
-#step = 10
-#roll = random.randrange(min, max, step)
