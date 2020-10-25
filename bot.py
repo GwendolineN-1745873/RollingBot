@@ -11,8 +11,9 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 
 bot = commands.Bot(command_prefix='!')
 
-
-@bot.command(name='roll', help='Simulates rolling dice. (Uses format "{amount}d{sides}", with amount being optional (default = 1).')
+# The roll command: !roll {amount}d{sides} 
+# (amount is optional, default = 1)
+@bot.command(name='roll', help='Simulates rolling dice. (Uses format "{amount}d{sides}" for <dice>, with amount being optional (default = 1).')
 async def roll(ctx, dice: str):
     pattern = re.compile("^[1-9]?d[1-9]\\d*$")
     
@@ -26,8 +27,8 @@ async def roll(ctx, dice: str):
     if (dice.split('d')[0] == ''):
         number_of_dice = 1
 
+    # Gets info from format "{amount}d{sides}"
     number_of_dice = int(number_of_dice)
-        
     number_of_sides = int(dice.split('d')[1])
     
     if(number_of_sides not in [4, 6, 8, 10, 12, 20, 100]):
@@ -35,6 +36,7 @@ async def roll(ctx, dice: str):
         await ctx.send(response)
         return
     
+    # Percentile dice requires different step
     if (number_of_sides == 100):
         step = 10
         rolls = [
@@ -48,12 +50,13 @@ async def roll(ctx, dice: str):
             for _ in range(number_of_dice)
         ]
     
-    addition = 0
-    for roll in rolls:
-        addition += int(roll)
-    
     response = str(ctx.author)+", you rolled: "+str(', '.join(rolls))+"."
+    
+    # Give sum of the rolls if more than one dice was used
     if (number_of_dice > 1):
+        addition = 0
+        for roll in rolls:
+            addition += int(roll)
         response +=" This adds up to "+str(addition)+"."
     
     await ctx.send(response)
