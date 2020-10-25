@@ -13,8 +13,8 @@ bot = commands.Bot(command_prefix='!')
 
 # The roll command: !roll {amount}d{sides} 
 # (amount is optional, default = 1)
-@bot.command(name='roll', help='Simulates rolling dice. (Uses format "{amount}d{sides}" for <dice>, with amount being optional (default = 1).')
-async def roll(ctx, dice: str):
+@bot.command(name='roll', help='Simulates rolling dice. (Uses format "{amount}d{sides} {advantage}", with amount being optional (default = 1), and {advantage} being either empty, -a for advantage or -d for disadvantage. Advantage/disadvantage only works for a single d20 roll.')
+async def roll(ctx, dice: str, advantage=""):
     pattern = re.compile("^[1-9]?d[1-9]\\d*$")
     
     if not pattern.match(dice):
@@ -23,9 +23,10 @@ async def roll(ctx, dice: str):
         await ctx.send(response)
         return
     
-    number_of_dice = dice.split('d')[0]
     if (dice.split('d')[0] == ''):
         number_of_dice = 1
+    else:
+        number_of_dice = dice.split('d')[0]
 
     # Gets info from format "{amount}d{sides}"
     number_of_dice = int(number_of_dice)
@@ -40,17 +41,34 @@ async def roll(ctx, dice: str):
     if (number_of_sides == 100):
         step = 10
         rolls = [
-            str(random.randrange(0, 100, step))
+            str(random.randrange(0, 101, step))
             for _ in range(number_of_dice)
         ]
     
     else:
-        rolls = [
-            str(random.choice(range(1, number_of_sides + 1)))
-            for _ in range(number_of_dice)
-        ]
+        # Roll d20 with advantage/disadvantage
+        if (number_of_sides == 20 and number_of_dice == 1 and (advantage == "-a" or advantage == "-d")):
+            rolls = []
+            rolls.append(random.randrange(1, number_of_sides + 1))
+            rolls.append(random.randrange(1, number_of_sides + 1))
+            
+            if (advantage == "-a"):
+                roll = max(rolls)
+                advantage_string = "advantage"
+            elif (advantage == "-d"):
+                roll = min(rolls)
+                advantage_string = "disadvantage"
+                
+            response = str(ctx.author)+", you rolled with "+advantage_string+": "+str(rolls[0])+" and "+str(rolls[1])+". So your roll is "+str(roll)+"."
+
+        # Normal roll
+        else:
+            rolls = [
+                str(random.randrange(1, number_of_sides + 1))
+                for _ in range(number_of_dice)
+            ]
     
-    response = str(ctx.author)+", you rolled: "+str(', '.join(rolls))+"."
+            response = str(ctx.author)+", you rolled: "+str(', '.join(rolls))+"."
     
     # Give sum of the rolls if more than one dice was used
     if (number_of_dice > 1):
@@ -59,6 +77,10 @@ async def roll(ctx, dice: str):
             addition += int(roll)
         response +=" This adds up to "+str(addition)+"."
     
+    if (advantage == "-a" or advantage == "-d"):
+        if (number_of_sides != 20 or number_of_dice != 1):
+            response +="\nAdvantage/disadvantage ignored. (Only for single d20 rolls!)"
+        
     await ctx.send(response)
 
 bot.run(TOKEN)
