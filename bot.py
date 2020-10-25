@@ -101,12 +101,21 @@ async def roll(ctx, dice: str, advantage=""):
             
             # Check if natural 1 or 20
             if (adv_roll == 1):
-                embed.add_field(name="Ouch, a natural 1. That must suck.", value="My bad! :)", inline=True)
+                embed.add_field(name="Ouch, a natural 1. That must suck.", value="My bad! :)", inline=False)
             
             elif (adv_roll == 20):
-                embed.add_field(name="A natural 20! HELL YEAH!!", value="You're welcome, by the way. :)", inline=True)
+                embed.add_field(name="A natural 20! HELL YEAH!!", value="You're welcome, by the way. :)", inline=False)
 
             embed.set_footer(text=f'Rolled with {advantage_string}.')
+    
+    elif (number_of_dice == 1 and number_of_sides == 20):
+        # Check if natural 1 or 20
+        if (rolls[0] == '1'):
+            embed.add_field(name="Ouch, a natural 1. That must suck.", value="My bad! :)", inline=False)
+        
+        elif (rolls[0] == '20'):
+            embed.add_field(name="A natural 20! HELL YEAH!!", value="You're welcome, by the way. :)", inline=False)
+
 
     #await ctx.send(response, embed=embed)
     await ctx.send(None, embed=embed)
